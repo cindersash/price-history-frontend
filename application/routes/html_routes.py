@@ -21,7 +21,7 @@ def homepage():
 
 
 @HTML_BLUEPRINT.route("/price_history/<product_id>")
-def gift_lists_page(product_id: int):
+def price_history_page(product_id: int):
     product_id = int(product_id)
 
     dao = _get_dao()
@@ -41,6 +41,7 @@ def gift_lists_page(product_id: int):
 def products_page(search_query: str):
     dao = _get_dao()
     products = dao.get_products(search_query)
+    products.sort(key=operator.attrgetter('display_name'))
 
     return render_template("products.html", search_query=search_query, products=products)
 
@@ -52,6 +53,7 @@ def category_page(category_id: int):
 
     display_name = dao.get_category_display_name(category_id)
     products = dao.get_category_products(category_id)
+    products.sort(key=operator.attrgetter('display_name'))
 
     return render_template("category.html", display_name=display_name, products=products)
 

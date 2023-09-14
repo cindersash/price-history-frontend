@@ -27,7 +27,7 @@
         labels: {{ dates | safe }},
         datasets: [
           {
-            label: 'Dataset',
+            label: 'Price History',
             data: {{ prices }},
             fill: false,
             stepped: true,
@@ -35,7 +35,8 @@
         ]
       };
 
-  const decimals = 2;
+    Chart.defaults.font.size = 18;
+    const decimals = 2;
 
     const config = {
         type: 'line',
