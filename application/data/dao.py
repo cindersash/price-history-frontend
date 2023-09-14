@@ -1,18 +1,9 @@
 import datetime
-import hashlib
 import logging
 import os
-import random
-import string
-from email.utils import parseaddr
-from typing import Optional, List, Dict
-from typing import TYPE_CHECKING
-from urllib.parse import urlparse
+from typing import List
 
-import bcrypt
 import pymongo
-from bson import ObjectId
-from flask import current_app
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
@@ -52,7 +43,9 @@ class ApplicationDao:
         dates = []
         prices = []
 
-        documents = self.prices_collection.find(filter={"product_id": product_id}, sort=[("start_date", pymongo.DESCENDING)])
+        documents = self.prices_collection.find(
+            filter={"product_id": product_id}, sort=[("start_date", pymongo.DESCENDING)]
+        )
 
         for document in documents:
             dates.append(document["start_date"].strftime(DATE_FORMAT_STRING))

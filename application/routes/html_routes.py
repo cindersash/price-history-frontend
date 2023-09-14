@@ -15,7 +15,7 @@ def homepage():
     dao = _get_dao()
 
     categories = dao.get_categories()
-    categories.sort(key=operator.attrgetter('display_name'))
+    categories.sort(key=operator.attrgetter("display_name"))
 
     return render_template("index.html", categories=categories)
 
@@ -34,14 +34,21 @@ def price_history_page(product_id: int):
     else:
         product_image_url = None
 
-    return render_template("price_history.html", product_id=product_id, dates=price_history.dates, prices=price_history.prices, product_image_url=product_image_url, product_display_name=product_display_name)
+    return render_template(
+        "price_history.html",
+        product_id=product_id,
+        dates=price_history.dates,
+        prices=price_history.prices,
+        product_image_url=product_image_url,
+        product_display_name=product_display_name,
+    )
 
 
 @HTML_BLUEPRINT.route("/products/<search_query>")
 def products_page(search_query: str):
     dao = _get_dao()
     products = dao.get_products(search_query)
-    products.sort(key=operator.attrgetter('display_name'))
+    products.sort(key=operator.attrgetter("display_name"))
 
     return render_template("products.html", search_query=search_query, products=products)
 
@@ -53,7 +60,7 @@ def category_page(category_id: int):
 
     display_name = dao.get_category_display_name(category_id)
     products = dao.get_category_products(category_id)
-    products.sort(key=operator.attrgetter('display_name'))
+    products.sort(key=operator.attrgetter("display_name"))
 
     return render_template("category.html", display_name=display_name, products=products)
 
