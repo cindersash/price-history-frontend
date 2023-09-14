@@ -18,6 +18,7 @@ from pymongo.collection import Collection
 from pymongo.database import Database
 
 from application.constants.app_constants import DATE_FORMAT_STRING
+from application.data.category import Category
 from application.data.price_history import PriceHistory
 from application.data.products_search import Product
 
@@ -76,6 +77,34 @@ class ApplicationDao:
         products = []
 
         documents = self.products_collection.find({"$text": {"$search": search_query}})
+        for document in documents:
+            product = Product(id=document["id"], display_name=document["display_name"])
+            products.append(product)
+
+        return products
+
+    def get_categories(self) -> List[Category]:
+        categories = []
+
+        documents = self.categories_collection.find({})
+        for document in documents:
+            category = Category(id=document["id"], display_name=document["display_name"])
+            categories.append(category)
+
+        return categories
+
+    def get_category_display_name(self, category_id: int) -> str:
+        document = self.categories_collection.find_one(filter={"id": category_id})
+
+        if document:
+            return document["display_name"]
+        else:
+            return "UNKNOWN"
+
+    def get_category_products(self, category_id: int) -> List[Product]:
+        products = []
+
+        documents = self.products_collection.find(filter={"category": category_id})
         for document in documents:
             product = Product(id=document["id"], display_name=document["display_name"])
             products.append(product)

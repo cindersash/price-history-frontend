@@ -1,3 +1,4 @@
+import operator
 import os
 
 from flask import Blueprint, current_app, render_template
@@ -11,7 +12,12 @@ PRODUCT_IMAGE_URL_PREFIX = os.environ.get("PRODUCT_IMAGE_URL_PREFIX")
 
 @HTML_BLUEPRINT.route("/")
 def homepage():
-    return render_template("index.html")
+    dao = _get_dao()
+
+    categories = dao.get_categories()
+    categories.sort(key=operator.attrgetter('display_name'))
+
+    return render_template("index.html", categories=categories)
 
 
 @HTML_BLUEPRINT.route("/price_history/<product_id>")
@@ -37,6 +43,17 @@ def products_page(search_query: str):
     products = dao.get_products(search_query)
 
     return render_template("products.html", search_query=search_query, products=products)
+
+
+@HTML_BLUEPRINT.route("/category/<category_id>")
+def category_page(category_id: int):
+    category_id = int(category_id)
+    dao = _get_dao()
+
+    display_name = dao.get_category_display_name(category_id)
+    products = dao.get_category_products(category_id)
+
+    return render_template("category.html", display_name=display_name, products=products)
 
 
 def _get_dao() -> ApplicationDao:
