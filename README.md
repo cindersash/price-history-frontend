@@ -1,4 +1,4 @@
-# Gifts
+# Price History
 A simple Flask application to display price history.
 
 ## Prerequisites

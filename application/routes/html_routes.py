@@ -31,5 +31,13 @@ def gift_lists_page(product_id: int):
     return render_template("price_history.html", product_id=product_id, dates=price_history.dates, prices=price_history.prices, product_image_url=product_image_url, product_display_name=product_display_name)
 
 
+@HTML_BLUEPRINT.route("/products/<search_query>")
+def products_page(search_query: str):
+    dao = _get_dao()
+    products = dao.get_products(search_query)
+
+    return render_template("products.html", search_query=search_query, products=products)
+
+
 def _get_dao() -> ApplicationDao:
     return current_app.config["DB"]

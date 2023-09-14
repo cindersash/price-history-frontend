@@ -19,6 +19,7 @@ from pymongo.database import Database
 
 from application.constants.app_constants import DATE_FORMAT_STRING
 from application.data.price_history import PriceHistory
+from application.data.products_search import Product
 
 DATABASE_NAME = "price_history"
 
@@ -70,3 +71,13 @@ class ApplicationDao:
             return document["display_name"]
         else:
             return "UNKNOWN"
+
+    def get_products(self, search_query: str) -> List[Product]:
+        products = []
+
+        documents = self.products_collection.find({"$text": {"$search": search_query}})
+        for document in documents:
+            product = Product(id=document["id"], display_name=document["display_name"])
+            products.append(product)
+
+        return products
