@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-danger">
+                {{ messages[0] }}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if variable != None %}
+        <p><img src="{{ product_image_url }}"></p>
+    {% endif %}
+    <h2>{{ product_display_name }}</h2>
+
+    <p>{{ dates }}</p>
+    <p>{{ prices }}</p>
+{% endblock %}
