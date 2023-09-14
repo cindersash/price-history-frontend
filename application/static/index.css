@@ -18,12 +18,12 @@ table {
 }
 
 .left-product-div {
-  width: 15%;
+  width: 25%;
   height: 200px;
   float: left;
 }
 
 .right-product-div {
-  margin-left: 15%;
+  margin-left: 25%;
   height: 200px;
 }
