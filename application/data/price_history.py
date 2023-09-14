@@ -6,3 +6,5 @@ from typing import List
 class PriceHistory:
     dates: List[str]
     prices: List[int]
+    minimum_price: str
+    maximum_price: str

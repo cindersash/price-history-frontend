@@ -56,7 +56,20 @@ class ApplicationDao:
             dates.append(datetime.datetime.today().strftime(DATE_FORMAT_STRING))
             prices.append(prices[-1])
 
-        return PriceHistory(dates=dates, prices=prices)
+        minimum_price = None
+        maximum_price = None
+        for price in prices:
+            if (minimum_price is None) or (minimum_price > price):
+                minimum_price = price
+            if (maximum_price is None) or (maximum_price < price):
+                maximum_price = price
+
+        if minimum_price:
+            minimum_price = "${:,.2f}".format(minimum_price)
+        if maximum_price:
+            maximum_price = "${:,.2f}".format(maximum_price)
+
+        return PriceHistory(dates=dates, prices=prices, minimum_price=minimum_price, maximum_price=maximum_price)
 
     def get_product_display_name(self, product_id: int) -> str:
         document = self.products_collection.find_one(filter={"id": product_id})
