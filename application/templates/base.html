@@ -35,6 +35,19 @@
 
 <div class="hero-body">
     <div id="content-block-div" class="container has-text-centered">
+        <script>
+            function redirect() {
+               window.location.href="/products/" + document.getElementById("productSearch").value;
+            }
+        </script>
+
+        <h3>Search for Products:</h3>
+        <form id="my-form" onsubmit="redirect(); return false" method="get" action="" >
+            <input id="productSearch" type="search" name="q" placeholder="grapes" autofocus required>
+            <input type="submit">
+        </form>
+        <p></p>
+
         {% block content %}
         {% endblock %}
     </div>

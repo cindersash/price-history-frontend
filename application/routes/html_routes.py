@@ -51,8 +51,9 @@ def products_page(search_query: str):
     dao = _get_dao()
     products = dao.get_products(search_query)
     products.sort(key=operator.attrgetter("display_name"))
+    num_results = len(products)
 
-    return render_template("products.html", search_query=search_query, products=products)
+    return render_template("products.html", search_query=search_query, products=products, num_results=num_results)
 
 
 @HTML_BLUEPRINT.route("/category/<category_id>")

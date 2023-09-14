@@ -10,18 +10,6 @@
         {% endif %}
     {% endwith %}
 
-    <script>
-        function redirect() {
-           window.location.href="/products/" + document.getElementById("productSearch").value;
-        }
-    </script>
-
-    <h1>Search for Products:</h1>
-    <form id="my-form" onsubmit="redirect(); return false" class="w3-center w3-padding-16" method="get" action="" >
-        <input id="productSearch" type="search" name="q" placeholder="Grapes" autofocus required>
-        <input type="submit">
-    </form>
-    <p></p>
     <h1>Categories:</h1>
     {% for category in categories %}
     <p>

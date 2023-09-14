@@ -9,3 +9,21 @@
 table {
     border: 1px solid black;
 }
+
+.container {
+  width: 80%;
+  height: 200px;
+  margin: auto;
+  padding: 10px;
+}
+
+.left-product-div {
+  width: 15%;
+  height: 200px;
+  float: left;
+}
+
+.right-product-div {
+  margin-left: 15%;
+  height: 200px;
+}
