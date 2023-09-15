@@ -100,15 +100,16 @@ class ApplicationDao:
 
         # We can only do searches in an aggregation pipeline
         start = time.perf_counter_ns()
-        documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}])
+
+        documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}], batchSize=500)
+        for document in documents:
+            product = Product(id=document["id"], display_name=document["display_name"])
+            products.append(product)
+
         duration_ms = (time.perf_counter_ns() - start) // 1000000
         print(f"Products search {search_query!r} took {duration_ms} ms")
         if self.metrics:
             self.metrics.log_products_search_time(search_time_ms=duration_ms, query=search_query)
-
-        for document in documents:
-            product = Product(id=document["id"], display_name=document["display_name"])
-            products.append(product)
 
         return products
 
