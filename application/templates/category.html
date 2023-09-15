@@ -16,7 +16,7 @@
         }
     </script>
 
-    <h1>{{ display_name }}</h1>
+    <h1>{{ display_name }} ({{ num_products }} Products):</h1>
     {% for product in products %}
     <p>
         <a href="/price_history/{{ product.id }}">{{ product.display_name | safe }}</a>

@@ -1,4 +1,5 @@
 import os
+from typing import Iterable
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -27,16 +28,29 @@ class Metrics:
 
         list_of_collections = self.database.list_collection_names()
 
-        if "products_search_time" not in list_of_collections:
-            self.database.create_collection("products_search_time", check_exists=True, capped=True, size=MAX_METRICS_SIZE, max=MAX_METRICS_DOCUMENTS)
-        if "products_price_history_time" not in list_of_collections:
-            self.database.create_collection("products_price_history_time", check_exists=True, capped=True, size=MAX_METRICS_SIZE, max=MAX_METRICS_DOCUMENTS)
+        self._create_capped_collection_if_not_exists("products_search_time", list_of_collections)
+        self._create_capped_collection_if_not_exists("products_price_history_time", list_of_collections)
+        self._create_capped_collection_if_not_exists("category_products_time", list_of_collections)
 
         self.products_search_time_collection: Collection = self.database["products_search_time"]
         self.products_price_history_time: Collection = self.database["products_price_history_time"]
+        self.category_products_time: Collection = self.database["category_products_time"]
 
     def log_products_search_time(self, search_time_ms: int, query: str):
         self.products_search_time_collection.insert_one({"search_time_ms": search_time_ms, "query": query})
 
     def log_products_price_history_time(self, time_ms: int, product_id: int):
         self.products_price_history_time.insert_one({"time_ms": time_ms, "product_id": product_id})
+
+    def log_category_products_time(self, time_ms: int, category_id: int):
+        self.category_products_time.insert_one({"time_ms": time_ms, "category_id": category_id})
+
+    def _create_capped_collection_if_not_exists(self, collection_name: str, collection_names: Iterable[str]):
+        if collection_name not in collection_names:
+            self.database.create_collection(
+                collection_name,
+                check_exists=True,
+                capped=True,
+                size=MAX_METRICS_SIZE,
+                max=MAX_METRICS_DOCUMENTS,
+            )

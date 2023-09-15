@@ -101,7 +101,7 @@ class ApplicationDao:
         # We can only do searches in an aggregation pipeline
         start = time.perf_counter_ns()
 
-        documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}], batchSize=500)
+        documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}])
         for document in documents:
             product = Product(id=document["id"], display_name=document["display_name"])
             products.append(product)
@@ -134,9 +134,16 @@ class ApplicationDao:
     def get_category_products(self, category_id: int) -> List[Product]:
         products = []
 
+        start = time.perf_counter_ns()
+
         documents = self.products_collection.find(filter={"category": category_id})
         for document in documents:
             product = Product(id=document["id"], display_name=document["display_name"])
             products.append(product)
+
+        duration_ms = (time.perf_counter_ns() - start) // 1000000
+        print(f"Category products {category_id!r} took {duration_ms} ms")
+        if self.metrics:
+            self.metrics.log_category_products_time(time_ms=duration_ms, category_id=category_id)
 
         return products

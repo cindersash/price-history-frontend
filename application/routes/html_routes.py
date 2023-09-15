@@ -64,8 +64,9 @@ def category_page(category_id: int):
     display_name = dao.get_category_display_name(category_id)
     products = dao.get_category_products(category_id)
     products.sort(key=operator.attrgetter("display_name"))
+    num_products = len(products)
 
-    return render_template("category.html", display_name=display_name, products=products)
+    return render_template("category.html", display_name=display_name, products=products, num_products=num_products)
 
 
 def _get_dao() -> ApplicationDao:
