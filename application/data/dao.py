@@ -82,7 +82,13 @@ class ApplicationDao:
     def get_products(self, search_query: str) -> List[Product]:
         products = []
 
-        documents = self.products_collection.find({"$text": {"$search": search_query}})
+        # We want to make sure each word appears in the product name, so use a compound search
+        word_searches = []
+        for word in search_query.split():
+            word_searches.append({"autocomplete": {"query": word, "path": "display_name"}})
+
+        # We can only do searches in an aggregation pipeline
+        documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}])
         for document in documents:
             product = Product(id=document["id"], display_name=document["display_name"])
             products.append(product)
