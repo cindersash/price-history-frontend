@@ -43,7 +43,7 @@
 
         <h3>Search for Products:</h3>
         <form id="my-form" onsubmit="redirect(); return false" method="get" action="" >
-            <input id="productSearch" type="search" name="q" placeholder="grapes" autofocus required>
+            <input id="productSearch" type="search" name="q" placeholder="grapes" value="{{ search_query }}" onfocus="var temp_value=this.value; this.value=''; this.value=temp_value" autofocus required>
             <input type="submit">
         </form>
         <p></p>
