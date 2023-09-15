@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import time
 from typing import List
 
 import pymongo
@@ -10,6 +11,7 @@ from pymongo.database import Database
 
 from application.constants.app_constants import DATE_FORMAT_STRING
 from application.data.category import Category
+from application.data.metrics import Metrics
 from application.data.price_history import PriceHistory
 from application.data.products_search import Product
 
@@ -19,7 +21,9 @@ LOG = logging.getLogger("DAO")
 
 
 class ApplicationDao:
-    def __init__(self, database: Database = None):
+    def __init__(self, database: Database = None, metrics: Metrics = None):
+        self.metrics = metrics
+
         # If no database provided, connect to one
         if database is None:
             username = os.environ.get("MONGO_USER")
@@ -42,6 +46,8 @@ class ApplicationDao:
     def get_product_price_history(self, product_id: int) -> PriceHistory:
         dates = []
         prices = []
+
+        start = time.perf_counter_ns()
 
         documents = self.prices_collection.find(
             filter={"product_id": product_id}, sort=[("start_date", pymongo.DESCENDING)]
@@ -69,6 +75,11 @@ class ApplicationDao:
         if maximum_price:
             maximum_price = "${:,.2f}".format(maximum_price)
 
+        duration_ms = (time.perf_counter_ns() - start) // 1000000
+        print(f"Price history for product {product_id!r} took {duration_ms} ms")
+        if self.metrics:
+            self.metrics.log_products_price_history_time(time_ms=duration_ms, product_id=product_id)
+
         return PriceHistory(dates=dates, prices=prices, minimum_price=minimum_price, maximum_price=maximum_price)
 
     def get_product_display_name(self, product_id: int) -> str:
@@ -88,7 +99,13 @@ class ApplicationDao:
             word_searches.append({"autocomplete": {"query": word, "path": "display_name"}})
 
         # We can only do searches in an aggregation pipeline
+        start = time.perf_counter_ns()
         documents = self.products_collection.aggregate([{"$search": {"compound": {"must": word_searches}}}])
+        duration_ms = (time.perf_counter_ns() - start) // 1000000
+        print(f"Products search {search_query!r} took {duration_ms} ms")
+        if self.metrics:
+            self.metrics.log_products_search_time(search_time_ms=duration_ms, query=search_query)
+
         for document in documents:
             product = Product(id=document["id"], display_name=document["display_name"])
             products.append(product)

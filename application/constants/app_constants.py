@@ -1,4 +1,8 @@
 # Key to use when accessing flask app config
 DATABASE_CONFIG_KEY = "DB"
+METRICS_CONFIG_KEY = "METRICS"
 
 DATE_FORMAT_STRING = "%Y-%m-%d"
+
+MAX_METRICS_SIZE = 1048576
+MAX_METRICS_DOCUMENTS = 100
