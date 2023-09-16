@@ -20,7 +20,7 @@ from application.constants.app_constants import (
     PRODUCT_PRICE_HISTORY_CACHE_PREFIX,
     PRODUCT_SEARCH_CACHE_PREFIX,
     CATEGORIES_CACHE_KEY,
-    CATEGORY_PRODUCTS_CACHE_KEY,
+    CATEGORY_PRODUCTS_CACHE_KEY, PRODUCT_IDS_SEARCH_CACHE_PREFIX, CATEGORY_NAME_CACHE_KEY,
 )
 from application.data.category import Category
 from application.data.metrics import Metrics
@@ -171,10 +171,17 @@ class ApplicationDao:
         return categories
 
     def get_category_display_name(self, category_id: int) -> str:
+        cache_key = f"{CATEGORY_NAME_CACHE_KEY}_{category_id}"
+        result = self.cache.get(cache_key)
+        if result:
+            return result.decode()
+
         document = self.categories_collection.find_one(filter={"id": category_id})
 
         if document:
-            return document["display_name"]
+            category_display_name = document["display_name"]
+            self.cache.set(cache_key, category_display_name)
+            return category_display_name
         else:
             return "UNKNOWN"
 
@@ -202,10 +209,17 @@ class ApplicationDao:
         return products
 
     def get_products_from_ids(self, product_ids: List[int]) -> List[Product]:
-        documents = self.products_collection.find({"id": {"$in": product_ids}})
-        products = []
-        for document in documents:
-            products.append(Product(id=document["id"], display_name=document["display_name"]))
+        cache_key = f"{PRODUCT_IDS_SEARCH_CACHE_PREFIX}_{json.dumps(product_ids)}"
+        result = self.cache.get(cache_key)
+        if result:
+            json_data = json.loads(result.decode())
+            products = [Product(**x) for x in json_data]
+        else:
+            documents = self.products_collection.find({"id": {"$in": product_ids}})
+            products = []
+            for document in documents:
+                products.append(Product(id=document["id"], display_name=document["display_name"]))
+            self.cache.set(cache_key, json.dumps(products), ex=ONE_DAY_IN_SECONDS)
 
         if len(products) != len(product_ids):
             LOG.warning(f"Could not find all products from ID list {product_ids}. Could only find {products}.")
