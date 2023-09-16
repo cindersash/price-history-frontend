@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 from email.utils import parseaddr
 from typing import Optional
 
@@ -9,11 +10,11 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
-
 LOG = logging.getLogger(__name__)
 
 DATABASE_NAME = "price_history_users"
 
+USER_ID_FIELD = "id"
 USER_EMAIL_FIELD = "email"
 USER_NAME_FIELD = "name"
 USER_PASSWORD_FIELD = "password"
@@ -37,6 +38,7 @@ class Users:
 
         self.users_collection: Collection = self.database["users"]
 
+        self.users_collection.create_index([(USER_ID_FIELD, pymongo.ASCENDING)], unique=True)
         self.users_collection.create_index([(USER_EMAIL_FIELD, pymongo.ASCENDING)], unique=True)
 
     def get_user_name(self, user_email: str) -> Optional[str]:
@@ -69,15 +71,23 @@ class Users:
             raise ValueError(f"User email {user_email} invalid!")
 
         # Ensure an existing user does not already exist
-        existing_user = self.get_user_name(user_email)
+        existing_user = self.get_user_id(user_email)
         if existing_user:
             LOG.warning(f"User already exists with email {user_email}. Not creating.")
             raise ValueError(f"User already exists with email {user_email}. Not creating.")
 
         user_password_hash = self._generate_user_password_hash(password)
 
+        # UUID should produce a unique identifier for us
+        user_id = str(uuid.uuid4())
+
         self.users_collection.insert_one(
-            {USER_EMAIL_FIELD: user_email, USER_NAME_FIELD: user_name, USER_PASSWORD_FIELD: user_password_hash}
+            {
+                USER_ID_FIELD: user_id,
+                USER_EMAIL_FIELD: user_email,
+                USER_NAME_FIELD: user_name,
+                USER_PASSWORD_FIELD: user_password_hash,
+            }
         )
 
     def user_auth(self, user_email: str, password_guess: str) -> bool:
@@ -92,16 +102,23 @@ class Users:
             True if the password is correct, False otherwise
         """
         # First, check that the user exists
-        user_name = self.get_user_name(user_email)
-        if user_name is None:
+        user_id = self.get_user_id(user_email)
+        if user_id is None:
             return False
 
         # If the user exists, check that the password hash matches
-        user_password_hash = self._get_user_password_hash(user_email)
+        user_password_hash = self._get_user_password_hash(user_id)
         return self._check_user_password(password_guess, user_password_hash)
 
-    def _get_user_password_hash(self, user_email: str) -> str:
-        return self.users_collection.find_one({USER_EMAIL_FIELD: user_email})[USER_PASSWORD_FIELD]
+    def get_user_id(self, user_email: str) -> Optional[str]:
+        user_document = self.users_collection.find_one({USER_EMAIL_FIELD: user_email})
+        if user_document:
+            return user_document[USER_ID_FIELD]
+        else:
+            return None
+
+    def _get_user_password_hash(self, user_id: str) -> str:
+        return self.users_collection.find_one({USER_EMAIL_FIELD: user_id})[USER_PASSWORD_FIELD]
 
     @staticmethod
     def _generate_user_password_hash(user_password: str) -> str:
