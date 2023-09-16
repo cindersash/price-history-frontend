@@ -9,6 +9,7 @@ from application.constants.app_constants import (
     DATABASE_CONFIG_KEY,
     SESSION_USER_EMAIL_KEY,
     SESSION_USER_NAME_KEY,
+    SESSION_USER_ID_KEY,
 )
 from application.data.dao import ApplicationDao
 from application.data.users import Users
@@ -57,6 +58,12 @@ def price_history_page(product_id: int):
     else:
         product_image_url = None
 
+    if SESSION_USER_ID_KEY in session:
+        user_id = session[SESSION_USER_ID_KEY]
+        is_favorite = _get_users().is_favorite(user_id, product_id)
+    else:
+        is_favorite = False
+
     return render_template(
         "price_history.html",
         product_id=product_id,
@@ -66,6 +73,7 @@ def price_history_page(product_id: int):
         maximum_price=price_history.maximum_price,
         product_image_url=product_image_url,
         product_display_name=product_display_name,
+        is_favorite=is_favorite,
     )
 
 
@@ -94,10 +102,7 @@ def category_page(category_id: int):
 
 @HTML_BLUEPRINT.route("/logout")
 def logout_page():
-    if SESSION_USER_EMAIL_KEY in session:
-        session.pop(SESSION_USER_EMAIL_KEY)
-    if SESSION_USER_NAME_KEY in session:
-        session.pop(SESSION_USER_NAME_KEY)
+    _logout_user()
     return redirect("/")
 
 
@@ -106,18 +111,26 @@ def about_page():
     return render_template("about.html")
 
 
+def _logout_user():
+    if SESSION_USER_ID_KEY in session:
+        LOG.info(f"Logging out user {session[SESSION_USER_ID_KEY]}")
+        session.pop(SESSION_USER_ID_KEY)
+    if SESSION_USER_EMAIL_KEY in session:
+        session.pop(SESSION_USER_EMAIL_KEY)
+    if SESSION_USER_NAME_KEY in session:
+        session.pop(SESSION_USER_NAME_KEY)
+
+
 def _is_user_logged_in() -> bool:
+    id_in_session = SESSION_USER_ID_KEY in session
     email_in_session = SESSION_USER_EMAIL_KEY in session
     name_in_session = SESSION_USER_NAME_KEY in session
-    if email_in_session != name_in_session:
-        LOG.error("Mismatch between user email and name in session! Resetting session.")
-        if SESSION_USER_EMAIL_KEY in session:
-            session.pop(SESSION_USER_EMAIL_KEY)
-        if SESSION_USER_NAME_KEY in session:
-            session.pop(SESSION_USER_NAME_KEY)
+    if email_in_session != name_in_session != id_in_session:
+        LOG.error("Mismatch between keys in session! Resetting session.")
+        _logout_user()
         return False
     else:
-        return email_in_session and name_in_session
+        return id_in_session and email_in_session and name_in_session
 
 
 def _get_dao() -> ApplicationDao:

@@ -4,6 +4,7 @@ METRICS_CONFIG_KEY = "METRICS"
 USERS_CONFIG_KEY = "USERS"
 
 # Session key names
+SESSION_USER_ID_KEY = "user_id"
 SESSION_USER_EMAIL_KEY = "user_email"
 SESSION_USER_NAME_KEY = "user_name"
 

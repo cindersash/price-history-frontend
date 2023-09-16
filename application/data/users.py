@@ -69,7 +69,7 @@ class Users:
         else:
             return None
 
-    def create_user(self, user_name: str, user_email: str, password: str):
+    def create_user(self, user_name: str, user_email: str, password: str) -> str:
         """
         Creates a new user with the given information.
         This method ensures the given email address is valid and that an existing user does not already exist.
@@ -78,6 +78,9 @@ class Users:
             user_name: the name of the user
             user_email: the email of the user
             password: the password for the new account
+
+        Returns:
+            The ID of the created user
 
         Raises:
             ValueError: if any checks fail.
@@ -108,7 +111,9 @@ class Users:
             }
         )
 
-    def user_auth(self, user_email: str, password_guess: str) -> bool:
+        return user_id
+
+    def user_auth(self, user_email: str, password_guess: str) -> Optional[str]:
         """
         Attempts to authenticate the given user with the given password.
 
@@ -117,16 +122,20 @@ class Users:
             password_guess: the password provided for the user
 
         Returns:
-            True if the password is correct, False otherwise
+            The user ID if the password is correct, None if not
         """
         # First, check that the user exists
         user_id = self.get_user_id(user_email)
         if user_id is None:
-            return False
+            return None
 
         # If the user exists, check that the password hash matches
         user_password_hash = self._get_user_password_hash(user_id)
-        return self._check_user_password(password_guess, user_password_hash)
+        correct_password = self._password_is_correct(password_guess, user_password_hash)
+        if correct_password:
+            return user_id
+        else:
+            return None
 
     def get_favorites(self, user_id: str) -> List[int]:
         """
@@ -144,7 +153,28 @@ class Users:
             favorites.append(document[FAVORITES_PRODUCT_ID_FIELD])
         return favorites
 
-    def toggle_favorite(self, user_id: str, product_id: str) -> bool:
+    def is_favorite(self, user_id: str, product_id: int) -> bool:
+        """
+        Returns whether the given product is favorited by the given user.
+
+        Args:
+            user_id: The user ID
+            product_id: The product ID
+
+        Returns:
+            True if the product is favorited, False if not
+        """
+        if not self._user_exists(user_id):
+            raise ValueError(f"User {user_id} does not exist!")
+
+        favorite_dict = {FAVORITES_USER_ID_FIELD: user_id, FAVORITES_PRODUCT_ID_FIELD: product_id}
+        document = self.favorites_collection.find_one(favorite_dict)
+        if document:
+            return True
+        else:
+            return False
+
+    def toggle_favorite(self, user_id: str, product_id: int) -> bool:
         """
         Toggles the favorite status of the given product for the given user.
 
@@ -186,6 +216,6 @@ class Users:
         return bcrypt.hashpw(user_password.encode("utf8"), bcrypt.gensalt()).decode("utf8")
 
     @staticmethod
-    def _check_user_password(password_guess: str, user_password_hash: str) -> bool:
+    def _password_is_correct(password_guess: str, user_password_hash: str) -> bool:
         # Check hashed password. Using bcrypt, the salt is saved into the hash itself
         return bcrypt.checkpw(password_guess.encode("utf8"), user_password_hash.encode("utf8"))

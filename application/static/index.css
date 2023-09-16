@@ -40,3 +40,8 @@ table {
     padding-left: 50px;
     border-left: 1px solid black;
 }
+
+.favorite-star {
+    width: 32px;
+    height: 32px;
+}
