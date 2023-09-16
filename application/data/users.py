@@ -2,7 +2,7 @@ import logging
 import os
 import uuid
 from email.utils import parseaddr
-from typing import Optional
+from typing import Optional, List
 
 import bcrypt
 import pymongo
@@ -14,10 +14,15 @@ LOG = logging.getLogger(__name__)
 
 DATABASE_NAME = "price_history_users"
 
+# Users collection fields
 USER_ID_FIELD = "id"
 USER_EMAIL_FIELD = "email"
 USER_NAME_FIELD = "name"
 USER_PASSWORD_FIELD = "password"
+
+# Favorites collection fields
+FAVORITES_USER_ID_FIELD = "user_id"
+FAVORITES_PRODUCT_ID_FIELD = "product_id"
 
 
 class Users:
@@ -36,10 +41,16 @@ class Users:
         # Set up database and collection variables
         self.database = database
 
+        # Users collection
         self.users_collection: Collection = self.database["users"]
-
         self.users_collection.create_index([(USER_ID_FIELD, pymongo.ASCENDING)], unique=True)
         self.users_collection.create_index([(USER_EMAIL_FIELD, pymongo.ASCENDING)], unique=True)
+
+        # Favorites collection
+        self.favorites_collection: Collection = self.database["favorites"]
+        self.favorites_collection.create_index(
+            [(FAVORITES_USER_ID_FIELD, pymongo.ASCENDING), (FAVORITES_PRODUCT_ID_FIELD, pymongo.ASCENDING)], unique=True
+        )
 
     def get_user_name(self, user_email: str) -> Optional[str]:
         if user_email is None:
@@ -50,6 +61,13 @@ class Users:
             return None
 
         return user_document[USER_NAME_FIELD]
+
+    def get_user_id(self, user_email: str) -> Optional[str]:
+        user_document = self.users_collection.find_one({USER_EMAIL_FIELD: user_email})
+        if user_document:
+            return user_document[USER_ID_FIELD]
+        else:
+            return None
 
     def create_user(self, user_name: str, user_email: str, password: str):
         """
@@ -110,15 +128,50 @@ class Users:
         user_password_hash = self._get_user_password_hash(user_id)
         return self._check_user_password(password_guess, user_password_hash)
 
-    def get_user_id(self, user_email: str) -> Optional[str]:
-        user_document = self.users_collection.find_one({USER_EMAIL_FIELD: user_email})
-        if user_document:
-            return user_document[USER_ID_FIELD]
+    def get_favorites(self, user_id: str) -> List[int]:
+        """
+        Get the favorites for a user.
+
+        Args:
+            user_id: The user ID
+
+        Returns:
+            A list of product IDs
+        """
+        documents = self.favorites_collection.find({FAVORITES_USER_ID_FIELD: user_id})
+        favorites = []
+        for document in documents:
+            favorites.append(document[FAVORITES_PRODUCT_ID_FIELD])
+        return favorites
+
+    def toggle_favorite(self, user_id: str, product_id: str):
+        """
+        Toggles the favorite status of the given product for the given user.
+
+        Args:
+            user_id: The user ID
+            product_id: The product ID
+        """
+        if not self._user_exists(user_id):
+            raise ValueError(f"User {user_id} does not exist!")
+
+        favorite_dict = {FAVORITES_USER_ID_FIELD: user_id, FAVORITES_PRODUCT_ID_FIELD: product_id}
+        document = self.favorites_collection.find_one(filter=favorite_dict)
+        if document:
+            LOG.info(f"Un-favoriting product {product_id} for user {user_id}")
         else:
-            return None
+            LOG.info(f"Favoriting product {product_id} for user {user_id}")
+            self.favorites_collection.insert_one(favorite_dict)
+
+    def _user_exists(self, user_id: str) -> bool:
+        user_document = self.users_collection.find_one(filter={USER_ID_FIELD: user_id})
+        if user_document:
+            return True
+        else:
+            return False
 
     def _get_user_password_hash(self, user_id: str) -> str:
-        return self.users_collection.find_one({USER_EMAIL_FIELD: user_id})[USER_PASSWORD_FIELD]
+        return self.users_collection.find_one({USER_ID_FIELD: user_id})[USER_PASSWORD_FIELD]
 
     @staticmethod
     def _generate_user_password_hash(user_password: str) -> str:
