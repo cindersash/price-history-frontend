@@ -1,6 +1,7 @@
 import logging
 import os
 
+import redis
 from flask import Flask
 
 from application.constants.app_constants import DATABASE_CONFIG_KEY, METRICS_CONFIG_KEY, USERS_CONFIG_KEY
@@ -15,6 +16,8 @@ logging.basicConfig(level=logging.INFO)
 logging.getLogger("engineio.server").setLevel(logging.WARNING)
 logging.getLogger("socketio.server").setLevel(logging.WARNING)
 
+LOG = logging.getLogger(__name__)
+
 
 def create_flask_app() -> Flask:
     # Create the flask app
@@ -27,7 +30,15 @@ def create_flask_app() -> Flask:
     metrics = Metrics()
     app.config[METRICS_CONFIG_KEY] = metrics
 
-    dao = ApplicationDao(metrics=metrics)
+    redis_url = os.environ.get("REDIS_DATA_URL")
+    if redis_url:
+        cache = redis.Redis.from_url(redis_url)
+        cache.ping()
+        LOG.info("Using Redis cache for data")
+    else:
+        cache = None
+
+    dao = ApplicationDao(metrics=metrics, cache=cache)
     app.config[DATABASE_CONFIG_KEY] = dao
 
     users = Users(dao=dao)
