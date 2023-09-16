@@ -1,9 +1,19 @@
+import logging
 import operator
 import os
 
-from flask import Blueprint, current_app, render_template
+from flask import Blueprint, current_app, render_template, session, redirect
 
+from application.constants.app_constants import (
+    USERS_CONFIG_KEY,
+    DATABASE_CONFIG_KEY,
+    SESSION_USER_EMAIL_KEY,
+    SESSION_USER_NAME_KEY,
+)
 from application.data.dao import ApplicationDao
+from application.data.users import Users
+
+LOG = logging.getLogger(__name__)
 
 HTML_BLUEPRINT = Blueprint("routes_html", __name__)
 
@@ -18,6 +28,19 @@ def homepage():
     categories.sort(key=operator.attrgetter("display_name"))
 
     return render_template("index.html", categories=categories)
+
+
+@HTML_BLUEPRINT.route("/profile")
+def profile_page():
+    if _is_user_logged_in():
+        return render_template("profile.html")
+    else:
+        return redirect("/login_signup")
+
+
+@HTML_BLUEPRINT.route("/login_signup")
+def login_signup_page():
+    return render_template("login_signup.html")
 
 
 @HTML_BLUEPRINT.route("/price_history/<product_id>")
@@ -69,5 +92,32 @@ def category_page(category_id: int):
     return render_template("category.html", display_name=display_name, products=products, num_products=num_products)
 
 
+@HTML_BLUEPRINT.route("/logout")
+def logout_page():
+    if SESSION_USER_EMAIL_KEY in session:
+        session.pop(SESSION_USER_EMAIL_KEY)
+    if SESSION_USER_NAME_KEY in session:
+        session.pop(SESSION_USER_NAME_KEY)
+    return redirect("/")
+
+
+def _is_user_logged_in() -> bool:
+    email_in_session = SESSION_USER_EMAIL_KEY in session
+    name_in_session = SESSION_USER_NAME_KEY in session
+    if email_in_session != name_in_session:
+        LOG.error("Mismatch between user email and name in session! Resetting session.")
+        if SESSION_USER_EMAIL_KEY in session:
+            session.pop(SESSION_USER_EMAIL_KEY)
+        if SESSION_USER_NAME_KEY in session:
+            session.pop(SESSION_USER_NAME_KEY)
+        return False
+    else:
+        return email_in_session and name_in_session
+
+
 def _get_dao() -> ApplicationDao:
-    return current_app.config["DB"]
+    return current_app.config[DATABASE_CONFIG_KEY]
+
+
+def _get_users() -> Users:
+    return current_app.config[USERS_CONFIG_KEY]

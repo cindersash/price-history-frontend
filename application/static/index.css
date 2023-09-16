@@ -27,3 +27,12 @@ table {
   margin-left: 25%;
   height: 200px;
 }
+
+#login_column {
+    padding-right: 50px;
+}
+
+#signup_column {
+    padding-left: 50px;
+    border-left: 1px solid black;
+}

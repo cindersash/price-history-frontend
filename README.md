@@ -42,6 +42,14 @@ To run this application, you need to set some environment variables:
 * `MONGO_PASSWORD` - The password for the MongoDB connection
 * `MONGO_HOST` - The host to connect to for the MongoDB connection
 * `PRODUCT_IMAGE_URL_PREFIX` - Prefix for product images
+* `SECRET_KEY` - Key used to sign session cookies
+* `USERS_USER` - The username for the MongoDB users database connection
+* `USERS_PASSWORD` - The password for the MongoDB users database connection
+
+The following environment variables are optional:
+* `METRICS_USER` - The username for the MongoDB metrics database connection
+* `METRICS_PASSWORD` - The password for the MongoDB metrics database connection
+* `METRICS_HOST` - The host for the MongoDB metrics database connection
 
 ### Local
 

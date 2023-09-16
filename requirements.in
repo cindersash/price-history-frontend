@@ -4,4 +4,3 @@ pymongo
 dnspython
 flask_accept
 bcrypt
-mailjet_rest

@@ -1,6 +1,11 @@
 # Key to use when accessing flask app config
 DATABASE_CONFIG_KEY = "DB"
 METRICS_CONFIG_KEY = "METRICS"
+USERS_CONFIG_KEY = "USERS"
+
+# Session key names
+SESSION_USER_EMAIL_KEY = "user_email"
+SESSION_USER_NAME_KEY = "user_name"
 
 DATE_FORMAT_STRING = "%Y-%m-%d"
 
