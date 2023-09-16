@@ -10,6 +10,9 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
+from application import ApplicationDao
+from application.data.products_search import Product
+
 LOG = logging.getLogger(__name__)
 
 DATABASE_NAME = "price_history_users"
@@ -26,7 +29,9 @@ FAVORITES_PRODUCT_ID_FIELD = "product_id"
 
 
 class Users:
-    def __init__(self, database: Database = None):
+    def __init__(self, dao: ApplicationDao, database: Database = None):
+        self.dao = dao
+
         # If no database provided, connect to one
         if database is None:
             username = os.environ.get("USERS_USER")
@@ -137,7 +142,7 @@ class Users:
         else:
             return None
 
-    def get_favorites(self, user_id: str) -> List[int]:
+    def get_favorites(self, user_id: str) -> List[Product]:
         """
         Get the favorites for a user.
 
@@ -148,9 +153,13 @@ class Users:
             A list of product IDs
         """
         documents = self.favorites_collection.find({FAVORITES_USER_ID_FIELD: user_id})
-        favorites = []
+
+        product_ids = []
         for document in documents:
-            favorites.append(document[FAVORITES_PRODUCT_ID_FIELD])
+            product_id = document[FAVORITES_PRODUCT_ID_FIELD]
+            product_ids.append(product_id)
+
+        favorites = self.dao.get_products_from_ids(product_ids)
         return favorites
 
     def is_favorite(self, user_id: str, product_id: int) -> bool:

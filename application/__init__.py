@@ -25,10 +25,13 @@ def create_flask_app() -> Flask:
 
     # Create a DAO and add it to the flask app config for access by the blueprints
     metrics = Metrics()
-    users = Users()
     app.config[METRICS_CONFIG_KEY] = metrics
+
+    dao = ApplicationDao(metrics=metrics)
+    app.config[DATABASE_CONFIG_KEY] = dao
+
+    users = Users(dao=dao)
     app.config[USERS_CONFIG_KEY] = users
-    app.config[DATABASE_CONFIG_KEY] = ApplicationDao(metrics=metrics)
 
     # This must be set in the environment as a secret
     app.secret_key = os.environ["SECRET_KEY"]

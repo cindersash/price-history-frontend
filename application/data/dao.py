@@ -147,3 +147,14 @@ class ApplicationDao:
             self.metrics.log_category_products_time(time_ms=duration_ms, category_id=category_id)
 
         return products
+
+    def get_products_from_ids(self, product_ids: List[int]) -> List[Product]:
+        documents = self.products_collection.find({"id": {"$in": product_ids}})
+        products = []
+        for document in documents:
+            products.append(Product(id=document["id"], display_name=document["display_name"]))
+
+        if len(products) != len(product_ids):
+            LOG.warning(f"Could not find all products from ID list {product_ids}. Could only find {products}.")
+
+        return products

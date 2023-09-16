@@ -28,7 +28,14 @@ def homepage():
     categories = dao.get_categories()
     categories.sort(key=operator.attrgetter("display_name"))
 
-    return render_template("index.html", categories=categories)
+    if SESSION_USER_ID_KEY in session:
+        user_id = session[SESSION_USER_ID_KEY]
+        favorites = _get_users().get_favorites(user_id=user_id)
+        favorites.sort(key=operator.attrgetter("display_name"))
+    else:
+        favorites = []
+
+    return render_template("index.html", categories=categories, favorites=favorites)
 
 
 @HTML_BLUEPRINT.route("/profile")
