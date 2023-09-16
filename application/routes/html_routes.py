@@ -1,5 +1,4 @@
 import logging
-import operator
 import os
 
 from flask import Blueprint, current_app, render_template, session, redirect

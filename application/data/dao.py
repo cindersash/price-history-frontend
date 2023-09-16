@@ -21,7 +21,9 @@ from application.constants.app_constants import (
     PRODUCT_PRICE_HISTORY_CACHE_PREFIX,
     PRODUCT_SEARCH_CACHE_PREFIX,
     CATEGORIES_CACHE_KEY,
-    CATEGORY_PRODUCTS_CACHE_KEY, PRODUCT_IDS_SEARCH_CACHE_PREFIX, CATEGORY_NAME_CACHE_KEY,
+    CATEGORY_PRODUCTS_CACHE_KEY,
+    PRODUCT_IDS_SEARCH_CACHE_PREFIX,
+    CATEGORY_NAME_CACHE_KEY,
 )
 from application.data.category import Category
 from application.data.metrics import Metrics
@@ -149,7 +151,6 @@ class ApplicationDao:
                 products.append(product)
 
             products.sort(key=operator.attrgetter("display_name"))
-
             self.cache.set(cache_key, json.dumps(products), ex=ONE_DAY_IN_SECONDS)
 
         duration_ms = (time.perf_counter_ns() - start) // 1000000
