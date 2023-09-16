@@ -144,24 +144,30 @@ class Users:
             favorites.append(document[FAVORITES_PRODUCT_ID_FIELD])
         return favorites
 
-    def toggle_favorite(self, user_id: str, product_id: str):
+    def toggle_favorite(self, user_id: str, product_id: str) -> bool:
         """
         Toggles the favorite status of the given product for the given user.
 
         Args:
             user_id: The user ID
             product_id: The product ID
+
+        Returns:
+            True if the product is now favorited, False if not
         """
         if not self._user_exists(user_id):
             raise ValueError(f"User {user_id} does not exist!")
 
         favorite_dict = {FAVORITES_USER_ID_FIELD: user_id, FAVORITES_PRODUCT_ID_FIELD: product_id}
-        document = self.favorites_collection.find_one(filter=favorite_dict)
+        document = self.favorites_collection.find_one(favorite_dict)
         if document:
             LOG.info(f"Un-favoriting product {product_id} for user {user_id}")
+            self.favorites_collection.delete_one(favorite_dict)
+            return False
         else:
             LOG.info(f"Favoriting product {product_id} for user {user_id}")
             self.favorites_collection.insert_one(favorite_dict)
+            return True
 
     def _user_exists(self, user_id: str) -> bool:
         user_document = self.users_collection.find_one(filter={USER_ID_FIELD: user_id})

@@ -53,13 +53,11 @@
     {% endif %}
 </nav>
 
-<div class="hero-body">
-    <div id="content-block-div" class="container has-text-centered">
-        {% block content %}
-        {% endblock %}
-    </div>
+<div id="content-block-div" class="container h-100">
+    {% block content %}
+    {% endblock %}
 </div>
-</section>
+{% include 'bottom.html' %}
 </body>
 
 </html>

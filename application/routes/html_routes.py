@@ -101,6 +101,11 @@ def logout_page():
     return redirect("/")
 
 
+@HTML_BLUEPRINT.route("/about")
+def about_page():
+    return render_template("about.html")
+
+
 def _is_user_logged_in() -> bool:
     email_in_session = SESSION_USER_EMAIL_KEY in session
     name_in_session = SESSION_USER_NAME_KEY in session

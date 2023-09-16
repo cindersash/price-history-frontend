@@ -2,6 +2,10 @@
     margin-top: 25px;
 }
 
+div #content-block-div {
+    min-height: 85% !important;
+}
+
 .space-block {
     padding-bottom: 10px;
 }
