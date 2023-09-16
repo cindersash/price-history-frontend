@@ -76,7 +76,7 @@ class ApplicationDao:
             prices = []
 
             documents = self.prices_collection.find(
-                filter={"product_id": product_id}, sort=[("start_date", pymongo.DESCENDING)]
+                filter={"product_id": product_id}, sort=[("start_date", pymongo.ASCENDING)]
             )
 
             for document in documents:
