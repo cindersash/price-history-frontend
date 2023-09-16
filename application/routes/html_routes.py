@@ -26,12 +26,10 @@ def homepage():
     dao = _get_dao()
 
     categories = dao.get_categories()
-    categories.sort(key=operator.attrgetter("display_name"))
 
     if SESSION_USER_ID_KEY in session:
         user_id = session[SESSION_USER_ID_KEY]
         favorites = _get_users().get_favorites(user_id=user_id)
-        favorites.sort(key=operator.attrgetter("display_name"))
     else:
         favorites = []
 
@@ -88,7 +86,6 @@ def price_history_page(product_id: int):
 def products_page(search_query: str):
     dao = _get_dao()
     products = dao.get_products(search_query)
-    products.sort(key=operator.attrgetter("display_name"))
     num_results = len(products)
 
     return render_template("products.html", search_query=search_query, products=products, num_results=num_results)
@@ -101,7 +98,6 @@ def category_page(category_id: int):
 
     display_name = dao.get_category_display_name(category_id)
     products = dao.get_category_products(category_id)
-    products.sort(key=operator.attrgetter("display_name"))
     num_products = len(products)
 
     return render_template("category.html", display_name=display_name, products=products, num_products=num_products)

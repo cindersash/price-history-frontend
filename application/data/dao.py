@@ -1,5 +1,6 @@
 import datetime
 import logging
+import operator
 import os
 import time
 from typing import List
@@ -146,6 +147,9 @@ class ApplicationDao:
             for document in documents:
                 product = Product(id=document["id"], display_name=document["display_name"])
                 products.append(product)
+
+            products.sort(key=operator.attrgetter("display_name"))
+
             self.cache.set(cache_key, json.dumps(products), ex=ONE_DAY_IN_SECONDS)
 
         duration_ms = (time.perf_counter_ns() - start) // 1000000
@@ -166,6 +170,8 @@ class ApplicationDao:
             for document in documents:
                 category = Category(id=document["id"], display_name=document["display_name"])
                 categories.append(category)
+
+            categories.sort(key=operator.attrgetter("display_name"))
             self.cache.set(CATEGORIES_CACHE_KEY, json.dumps(categories))
 
         return categories
@@ -199,6 +205,8 @@ class ApplicationDao:
             for document in documents:
                 product = Product(id=document["id"], display_name=document["display_name"])
                 products.append(product)
+
+            products.sort(key=operator.attrgetter("display_name"))
             self.cache.set(cache_key, json.dumps(products), ex=ONE_DAY_IN_SECONDS)
 
         duration_ms = (time.perf_counter_ns() - start) // 1000000
@@ -219,6 +227,8 @@ class ApplicationDao:
             products = []
             for document in documents:
                 products.append(Product(id=document["id"], display_name=document["display_name"]))
+
+            products.sort(key=operator.attrgetter("display_name"))
             self.cache.set(cache_key, json.dumps(products), ex=ONE_DAY_IN_SECONDS)
 
         if len(products) != len(product_ids):
