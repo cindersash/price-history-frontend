@@ -84,9 +84,11 @@ class ApplicationDao:
                 prices.append(float(document["price_cents"]) / 100.0)
 
             # Ensure we add a data point for today based on the most recent data point
+            current_price = None
             if dates:
                 dates.append(datetime.datetime.today().strftime(DATE_FORMAT_STRING))
                 prices.append(prices[-1])
+                current_price = "${:,.2f}".format(prices[-1])
 
             minimum_price = None
             maximum_price = None
@@ -102,7 +104,11 @@ class ApplicationDao:
                 maximum_price = "${:,.2f}".format(maximum_price)
 
             price_history = PriceHistory(
-                dates=dates, prices=prices, minimum_price=minimum_price, maximum_price=maximum_price
+                dates=dates,
+                prices=prices,
+                current_price=current_price,
+                minimum_price=minimum_price,
+                maximum_price=maximum_price,
             )
             self.cache.set(cache_key, json.dumps(price_history), ex=ONE_DAY_IN_SECONDS)
 
