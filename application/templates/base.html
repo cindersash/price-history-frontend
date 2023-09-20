@@ -11,6 +11,34 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
+    <script>
+        (function () {
+          // Create a script tag for loading the library
+          var script = document.createElement("script");
+
+          // Initialize the Web-SDK at the onLoad event of the script tag above so it will be called when the library is loaded.
+          script.onload = () => {
+            window.GrafanaFaroWebSdk.initializeFaro({
+              // Mandatory, the URL of the Grafana Cloud collector with embedded application key.
+              url: 'https://faro-collector-prod-us-west-0.grafana.net/collect/eadc641352d87776b964c39c2e569672',
+
+              // Mandatory, the identification label(s) of your application
+              app: {
+                name: 'price-history-frontend',
+                version: "1.0.0",
+              },
+            });
+          };
+
+          // Set the source of the script tag to the CDN
+          script.src =
+            "https://unpkg.com/@grafana/faro-web-sdk@^1.0.0/dist/bundle/faro-web-sdk.iife.js";
+
+          // Append the script tag to the head of the HTML page
+          document.head.appendChild(script);
+        })();
+    </script>
+
     <title>Price History</title>
 </head>
 
