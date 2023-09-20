@@ -109,6 +109,7 @@
 
     new Chart(ctx, config);
 </script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 <script>
     $(".favorite-star").on("click", function(event) {
       var jqxhr = $.post( "/api/v1/toggle_favorite/{{ product_id }}", function(data) {
