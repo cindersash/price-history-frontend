@@ -3,6 +3,7 @@ import os
 
 import redis
 from flask import Flask
+from flask_compress import Compress
 
 from application.constants.app_constants import DATABASE_CONFIG_KEY, METRICS_CONFIG_KEY, USERS_CONFIG_KEY
 from application.data.custom_json_encoder import CustomJsonEncoder
@@ -18,10 +19,15 @@ logging.getLogger("socketio.server").setLevel(logging.WARNING)
 
 LOG = logging.getLogger(__name__)
 
+COMPRESS = Compress()
+
 
 def create_flask_app() -> Flask:
     # Create the flask app
     app = Flask(__name__)
+
+    # Enable gzip compression for requests
+    COMPRESS.init_app(app)
 
     # Set custom JSON encoder to handle MongoDB ObjectID
     app.json_encoder = CustomJsonEncoder

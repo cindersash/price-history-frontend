@@ -6,3 +6,4 @@ flask_accept
 bcrypt
 redis
 fakeredis
+Flask-Compress
