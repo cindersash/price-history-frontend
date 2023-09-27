@@ -117,6 +117,7 @@ def about_page():
     num_prices = dao.get_num_prices()
     oldest_price_date = dao.get_oldest_price_document_date()
     newest_price_date = dao.get_newest_price_document_date()
+    product_with_most_prices = dao.get_product_with_most_price_documents()
 
     return render_template(
         "about.html",
@@ -124,6 +125,7 @@ def about_page():
         num_prices=f"{num_prices:,}",
         oldest_price_date=oldest_price_date,
         newest_price_date=newest_price_date,
+        product_with_most_prices=product_with_most_prices,
     )
 
 

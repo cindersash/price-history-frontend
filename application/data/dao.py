@@ -27,7 +27,7 @@ from application.constants.app_constants import (
     NUM_PRODUCTS_CACHE_KEY,
     NUM_PRICES_CACHE_KEY,
     ONE_HOUR_IN_SECONDS,
-    EXTREMES_PRICE_DATE_CACHE_PREFIX,
+    EXTREMES_PRICE_DATE_CACHE_PREFIX, MOST_PRICES_PRODUCT_CACHE_KEY,
 )
 from application.data.category import Category
 from application.data.metrics import Metrics
@@ -282,3 +282,14 @@ class ApplicationDao:
         date_string = date.date().isoformat()
         self.cache.set(cache_key, date_string, ex=ONE_HOUR_IN_SECONDS)
         return date_string
+
+    def get_product_with_most_price_documents(self) -> int:
+        result = self.cache.get(MOST_PRICES_PRODUCT_CACHE_KEY)
+        if result:
+            return int(result)
+
+        result = self.prices_collection.aggregate([{"$sortByCount": "$product_id"}, {"$limit": 1}])
+        document = result.next()
+        product_id = document["_id"]
+        self.cache.set(MOST_PRICES_PRODUCT_CACHE_KEY, product_id, ex=ONE_DAY_IN_SECONDS)
+        return product_id
