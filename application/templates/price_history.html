@@ -132,15 +132,21 @@
 <table>
     <tr>
         <td><h4>Current Price:</h4></td>
+        {% if current_price == minimum_price %}
+        <td><h4 class="text-success">{{ current_price }}</h4></td>
+        {% elif current_price == maximum_price %}
+        <td><h4 class="text-danger">{{ current_price }}</h4></td>
+        {% else %}
         <td><h4>{{ current_price }}</h4></td>
+        {% endif %}
     </tr>
     <tr>
         <td><h4>Minimum Price:</h4></td>
-        <td><h4>{{ minimum_price }}</h4></td>
+        <td><h4 class="text-success">{{ minimum_price }}</h4></td>
     </tr>
     <tr>
         <td><h4>Maximum Price:</h4></td>
-        <td><h4>{{ maximum_price }}</h4></td>
+        <td><h4 class="text-danger">{{ maximum_price }}</h4></td>
     </tr>
 </table>
 
