@@ -3,6 +3,24 @@
 {% block content %}
 
     <h1>About</h1>
-    <a href="https://www.flaticon.com/free-icons/star" title="star icons">Star icons created by Pixel perfect - Flaticon</a>
+
+    <h3>Credits</h3>
+    <p>
+        <a href="https://www.flaticon.com/free-icons/star" title="star icons">Star icons created by Pixel perfect - Flaticon</a>
+    </p>
+
+    <h3>Stats</h3>
+    <p>
+        Number of tracked products: {{ num_products }}
+    </p>
+    <p>
+        Number of price documents: {{ num_prices }}
+    </p>
+    <p>
+        Oldest price document: {{ oldest_price_date }}
+    </p>
+    <p>
+        Newest price document: {{ newest_price_date }}
+    </p>
 
 {% endblock %}

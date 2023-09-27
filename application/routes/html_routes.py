@@ -111,7 +111,20 @@ def logout_page():
 
 @HTML_BLUEPRINT.route("/about")
 def about_page():
-    return render_template("about.html")
+    dao = _get_dao()
+
+    num_products = dao.get_num_products()
+    num_prices = dao.get_num_prices()
+    oldest_price_date = dao.get_oldest_price_document_date()
+    newest_price_date = dao.get_newest_price_document_date()
+
+    return render_template(
+        "about.html",
+        num_products=f"{num_products:,}",
+        num_prices=f"{num_prices:,}",
+        oldest_price_date=oldest_price_date,
+        newest_price_date=newest_price_date,
+    )
 
 
 def _logout_user():

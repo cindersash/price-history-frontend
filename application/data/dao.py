@@ -24,6 +24,10 @@ from application.constants.app_constants import (
     CATEGORY_PRODUCTS_CACHE_KEY,
     PRODUCT_IDS_SEARCH_CACHE_PREFIX,
     CATEGORY_NAME_CACHE_KEY,
+    NUM_PRODUCTS_CACHE_KEY,
+    NUM_PRICES_CACHE_KEY,
+    ONE_HOUR_IN_SECONDS,
+    EXTREMES_PRICE_DATE_CACHE_PREFIX,
 )
 from application.data.category import Category
 from application.data.metrics import Metrics
@@ -242,3 +246,39 @@ class ApplicationDao:
             LOG.warning(f"Could not find all products from ID list {product_ids}. Could only find {products}.")
 
         return products
+
+    def get_num_products(self) -> int:
+        result = self.cache.get(NUM_PRODUCTS_CACHE_KEY)
+        if result:
+            return int(result)
+
+        num_documents = self.products_collection.count_documents(filter={})
+        self.cache.set(NUM_PRODUCTS_CACHE_KEY, num_documents, ex=ONE_DAY_IN_SECONDS)
+        return num_documents
+
+    def get_num_prices(self) -> int:
+        result = self.cache.get(NUM_PRICES_CACHE_KEY)
+        if result:
+            return int(result)
+
+        num_documents = self.prices_collection.count_documents(filter={})
+        self.cache.set(NUM_PRICES_CACHE_KEY, num_documents, ex=ONE_DAY_IN_SECONDS)
+        return num_documents
+
+    def get_oldest_price_document_date(self) -> str:
+        return self._get_extreme_price_document_date(pymongo.ASCENDING)
+
+    def get_newest_price_document_date(self) -> str:
+        return self._get_extreme_price_document_date(pymongo.DESCENDING)
+
+    def _get_extreme_price_document_date(self, sort_order: int) -> str:
+        cache_key = f"{EXTREMES_PRICE_DATE_CACHE_PREFIX}_{sort_order}"
+        result = self.cache.get(cache_key)
+        if result:
+            return result.decode()
+
+        document = self.prices_collection.find_one(sort=[("start_date", sort_order)])
+        date: datetime.datetime = document["start_date"]
+        date_string = date.date().isoformat()
+        self.cache.set(cache_key, date_string, ex=ONE_HOUR_IN_SECONDS)
+        return date_string
