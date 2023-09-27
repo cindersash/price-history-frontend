@@ -18,15 +18,16 @@ div #content-block-div {
 }
 
 .left-product-div {
-  width: 25%;
+  width: 200px;
   height: 200px;
   float: left;
-  margin-right: 50px;
+  margin-right: 25px;
   display: inline-block;
 }
 
 .right-product-div {
-  height: 200px;
+  min-width: 275px;
+  max-width: 75%;
   display: inline-block;
 }
 
