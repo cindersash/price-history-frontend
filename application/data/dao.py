@@ -94,7 +94,7 @@ class ApplicationDao:
             if dates:
                 dates.append(todays_date)
                 prices.append(prices[-1])
-                current_price = "${:,.2f}".format(prices[-1])
+                current_price = prices[-1]
 
             minimum_price = None
             maximum_price = None
@@ -114,11 +114,6 @@ class ApplicationDao:
                         maximum_price_date = dates[i + 1] - datetime.timedelta(days=1)
                     else:
                         maximum_price_date = todays_date
-
-            if minimum_price:
-                minimum_price = "${:,.2f}".format(minimum_price)
-            if maximum_price:
-                maximum_price = "${:,.2f}".format(maximum_price)
 
             price_history = PriceHistory(
                 dates=[x.strftime(DATE_FORMAT_STRING) for x in dates],

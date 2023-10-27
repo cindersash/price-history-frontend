@@ -6,8 +6,8 @@ from typing import List
 class PriceHistory:
     dates: List[str]
     prices: List[float]
-    current_price: str
-    minimum_price: str
-    maximum_price: str
+    current_price: float
+    minimum_price: float
+    maximum_price: float
     minimum_price_date: str = None
     maximum_price_date: str = None
