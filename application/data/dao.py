@@ -27,7 +27,8 @@ from application.constants.app_constants import (
     NUM_PRODUCTS_CACHE_KEY,
     NUM_PRICES_CACHE_KEY,
     ONE_HOUR_IN_SECONDS,
-    EXTREMES_PRICE_DATE_CACHE_PREFIX, MOST_PRICES_PRODUCT_CACHE_KEY,
+    EXTREMES_PRICE_DATE_CACHE_PREFIX,
+    MOST_PRICES_PRODUCT_CACHE_KEY,
 )
 from application.data.category import Category
 from application.data.metrics import Metrics
@@ -76,31 +77,43 @@ class ApplicationDao:
         if result:
             price_history = PriceHistory(**json.loads(result.decode()))
         else:
-            dates = []
-            prices = []
+            dates: List[datetime] = []
+            prices: List[float] = []
 
             documents = self.prices_collection.find(
                 filter={"product_id": product_id}, sort=[("start_date", pymongo.ASCENDING)]
             )
 
             for document in documents:
-                dates.append(document["start_date"].strftime(DATE_FORMAT_STRING))
+                dates.append(document["start_date"])
                 prices.append(float(document["price_cents"]) / 100.0)
 
             # Ensure we add a data point for today based on the most recent data point
             current_price = None
+            todays_date = datetime.datetime.today()
             if dates:
-                dates.append(datetime.datetime.today().strftime(DATE_FORMAT_STRING))
+                dates.append(todays_date)
                 prices.append(prices[-1])
                 current_price = "${:,.2f}".format(prices[-1])
 
             minimum_price = None
             maximum_price = None
-            for price in prices:
-                if (minimum_price is None) or (minimum_price > price):
+            minimum_price_date = None
+            maximum_price_date = None
+            for i in range(len(prices)):
+                price = prices[i]
+                if (minimum_price is None) or (minimum_price >= price):
                     minimum_price = price
-                if (maximum_price is None) or (maximum_price < price):
+                    if i < len(dates) - 1:
+                        minimum_price_date = dates[i + 1] - datetime.timedelta(days=1)
+                    else:
+                        minimum_price_date = todays_date
+                if (maximum_price is None) or (maximum_price <= price):
                     maximum_price = price
+                    if i < len(dates) - 1:
+                        maximum_price_date = dates[i + 1] - datetime.timedelta(days=1)
+                    else:
+                        maximum_price_date = todays_date
 
             if minimum_price:
                 minimum_price = "${:,.2f}".format(minimum_price)
@@ -108,11 +121,13 @@ class ApplicationDao:
                 maximum_price = "${:,.2f}".format(maximum_price)
 
             price_history = PriceHistory(
-                dates=dates,
+                dates=[x.strftime(DATE_FORMAT_STRING) for x in dates],
                 prices=prices,
                 current_price=current_price,
                 minimum_price=minimum_price,
                 maximum_price=maximum_price,
+                minimum_price_date=minimum_price_date.strftime(DATE_FORMAT_STRING),
+                maximum_price_date=maximum_price_date.strftime(DATE_FORMAT_STRING),
             )
             self.cache.set(cache_key, json.dumps(price_history), ex=ONE_DAY_IN_SECONDS)
 

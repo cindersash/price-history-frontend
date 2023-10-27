@@ -76,6 +76,8 @@ def price_history_page(product_id: int):
         current_price=price_history.current_price,
         minimum_price=price_history.minimum_price,
         maximum_price=price_history.maximum_price,
+        minimum_price_date=price_history.minimum_price_date,
+        maximum_price_date=price_history.maximum_price_date,
         product_image_url=product_image_url,
         product_display_name=product_display_name,
         is_favorite=is_favorite,
