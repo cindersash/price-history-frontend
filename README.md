@@ -45,6 +45,7 @@ To run this application, you need to set some environment variables:
 * `SECRET_KEY` - Key used to sign session cookies
 * `USERS_USER` - The username for the MongoDB users database connection
 * `USERS_PASSWORD` - The password for the MongoDB users database connection
+* `REDIS_DATA_URL` - The URL for the cache connection
 
 The following environment variables are optional:
 * `METRICS_USER` - The username for the MongoDB metrics database connection
