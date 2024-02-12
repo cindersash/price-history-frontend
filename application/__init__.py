@@ -5,6 +5,11 @@ import redis
 from flask import Flask
 from flask_compress import Compress
 
+from dotenv import load_dotenv
+
+# Load the environment variables from the .env file
+load_dotenv()
+
 from application.constants.app_constants import DATABASE_CONFIG_KEY, METRICS_CONFIG_KEY, USERS_CONFIG_KEY
 from application.data.custom_json_encoder import CustomJsonEncoder
 from application.data.dao import ApplicationDao

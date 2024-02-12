@@ -1,5 +1,5 @@
 Flask
-gunicorn
+waitress
 pymongo
 dnspython
 flask_accept
@@ -7,3 +7,4 @@ bcrypt
 redis
 fakeredis
 Flask-Compress
+python-dotenv

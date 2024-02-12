@@ -22,20 +22,6 @@ source venv/bin/activate
 pip install -Ur requirements.txt
 ```
 
-### SSL
-To preserve consistency with running in the cloud, this application uses HTTPS even when running locally.
-You will need to run the following commands from the root of the repo to get ready for HTTPS:
-```
-mkdir ssl
-cd ssl
-openssl req -nodes -new -x509 -keyout server.key -out server.crt \
-    -subj "/C=GB/ST=London/L=London/O=Local/OU=Local/CN=127.0.0.1"
-```
-The `ssl` folder is ignored by `git` so you should not need to worry about committing the
-generated key and certificate.
-
-After generating the key and certificate, you are ready to run the application.
-
 ## Running
 To run this application, you need to set some environment variables:
 * `MONGO_USER` - The username for the MongoDB connection
