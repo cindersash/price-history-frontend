@@ -1,7 +1,16 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-{% block content %}
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body>
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="alert alert-danger">
@@ -10,8 +19,9 @@
         {% endif %}
     {% endwith %}
 
+    <p></p>
     <div class="text-center">
         <a href="/categories"><h1>Categories</h1></a>
     </div>
-
-{% endblock %}
+</body>
+</html>
