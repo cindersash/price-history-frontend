@@ -21,7 +21,12 @@ PRODUCT_IMAGE_URL_PREFIX = os.environ.get("PRODUCT_IMAGE_URL_PREFIX")
 
 
 @HTML_BLUEPRINT.route("/")
-def homepage():
+def home_page():
+    return render_template("index.html")
+
+
+@HTML_BLUEPRINT.route("/categories")
+def categories_page():
     dao = _get_dao()
 
     categories = dao.get_categories()
@@ -32,7 +37,7 @@ def homepage():
     else:
         favorites = []
 
-    return render_template("index.html", categories=categories, favorites=favorites)
+    return render_template("categories.html", categories=categories, favorites=favorites)
 
 
 @HTML_BLUEPRINT.route("/profile")
